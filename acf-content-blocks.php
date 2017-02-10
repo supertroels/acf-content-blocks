@@ -1,11 +1,11 @@
 <?php
 
 /*
-Plugin Name: WP Content Blocks
+Plugin Name: Content Blocks for ACF Pro
 */
 
 
-class wp_content_blocks {
+class acf_content_blocks {
 
 
 	public static $registered_blocks = array();
@@ -17,19 +17,21 @@ class wp_content_blocks {
 		if(!self::check_dependencies())
 			return null;
 
-		add_filter('wp_content_blocks/register_blocks', 'wp_content_blocks::register_default_blocks', 1, 1);
+		include 'acfcb_block.php';
 
-		add_action('acf/init', 'wp_content_blocks::register_blocks');
-		add_action('acf/init', 'wp_content_blocks::register_content_blocks_field');
+		add_filter('acf_content_blocks/register_blocks', 'acf_content_blocks::register_default_blocks', 1, 1);
 
-		// add_filter('the_content', 'wp_content_blocks::do_blocks', 1, 1);
-		// add_filter('save_post', 'wp_content_blocks::update_fallback_content', 10, 1 );
+		add_action('acf/init', 'acf_content_blocks::register_blocks');
+		add_action('acf/init', 'acf_content_blocks::register_content_blocks_field');
+
+		// add_filter('the_content', 'acf_content_blocks::do_blocks', 1, 1);
+		// add_filter('save_post', 'acf_content_blocks::update_fallback_content', 10, 1 );
 
 	}
 
 
 	public static function register_blocks(){
-		self::$registered_blocks = apply_filters('wp_content_blocks/register_blocks', array());
+		self::$registered_blocks = apply_filters('acf_content_blocks/register_blocks', array());
 	}
 
 
@@ -67,7 +69,7 @@ class wp_content_blocks {
 					'layouts' => $blocks
 				)
 			),
-			'location' 	=> apply_filters('wp_content_blocks/location', array(
+			'location' 	=> apply_filters('acf_content_blocks/location', array(
 				array(
 					array(
 						'param' => 'post_type',
@@ -104,7 +106,7 @@ class wp_content_blocks {
 	public static function register_default_blocks($blocks){
 
 		$blocks_dir = dirname(__FILE__).'/blocks/';
-		if($files = glob($blocks_dir.'wpcb_block_*.php')){
+		if($files = glob($blocks_dir.'acfcb_block_*.php')){
 			foreach($files as $file){
 				$classname = str_ireplace(array($blocks_dir,'.php'), '', $file);
 				// error_log(var_export($file, true));
@@ -189,6 +191,6 @@ class wp_content_blocks {
 
 }
 
-wp_content_blocks::init();
+acf_content_blocks::init();
 
 ?>

@@ -1,21 +1,20 @@
 <?php
 
-class wpcb_block_text {
+class acfcb_block_text extends acfcb_block {
 
 
 	public static function register_block(){
 
-
 		$block = array(
-			'key' => 'wpcbtext00001',
-			'name' => 'wpcb_block_text',
+			'key' => self::get_field_key(123),
+			'name' => 'acfcb_block_text',
 			'label' => 'Text',
 			'display' => 'block',
 			'sub_fields' => array (
 				array (
-					'key' => 'field_wpcbtext00002',
+					'key' => 'field_'.self::get_field_key(2),
 					'label' => 'Content',
-					'name' => 'block_text_content',
+					'name' => self::get_field_prefix().'content',
 					'type' => 'wysiwyg',
 					'instructions' => '',
 					'required' => 0,
@@ -35,9 +34,10 @@ class wpcb_block_text {
 			'max' => '',
 			);
 
-		return $block;
+		return apply_filters('acfcb_block/text', $block);
 
 	}
+
 
 }
 
