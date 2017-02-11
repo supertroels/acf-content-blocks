@@ -6,7 +6,7 @@ class acfcb_block_text extends acfcb_block {
 	public static function register_block(){
 
 		$block = array(
-			'key' => self::get_field_key(123),
+			'key' => self::get_field_key(1),
 			'name' => 'acfcb_block_text',
 			'label' => 'Text',
 			'display' => 'block',
