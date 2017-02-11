@@ -9,6 +9,7 @@ class acf_content_blocks {
 
 
 	public static $registered_blocks = array();
+	public static $fallback_templates = array();
 	public static $updating = false;
 
 
@@ -24,8 +25,8 @@ class acf_content_blocks {
 		add_action('acf/init', 'acf_content_blocks::register_blocks');
 		add_action('acf/init', 'acf_content_blocks::register_content_blocks_field');
 
-		// add_filter('the_content', 'acf_content_blocks::do_blocks', 1, 1);
-		// add_filter('save_post', 'acf_content_blocks::update_fallback_content', 10, 1 );
+		add_filter('the_content', 'acf_content_blocks::do_blocks', 1, 1);
+		add_filter('save_post', 'acf_content_blocks::update_fallback_content', 10, 1 );
 
 	}
 
@@ -37,12 +38,27 @@ class acf_content_blocks {
 
 	public static function register_content_blocks_field(){
 
-
 		$blocks = array();
+
 		if(self::$registered_blocks){
-			foreach(self::$registered_blocks as $block_class)
-				if(method_exists($block_class, 'register_block'))
-					$blocks[] = call_user_func(array($block_class, 'register_block'));
+			foreach(self::$registered_blocks as $name => $dir){
+
+				// Main file
+				$file = $dir.'/acfcb_block_'.$name.'.php';
+				if(file_exists($file)){
+					include $file;
+					$class = 'acfcb_block_'.$name;
+					if(method_exists($class, 'register_block'))
+						$blocks[$name] = call_user_func(array($class, 'register_block'));
+				}
+
+				// Fallback template
+				$file = $dir.'/fallback.php';
+				if(file_exists($file)){
+					self::$fallback_templates[$name] = $file;
+				}
+
+			}
 		}
 
 
@@ -53,7 +69,7 @@ class acf_content_blocks {
 				array(
 					'key' => 'field_wpcb000000002',
 					'label' => '',
-					'name' => 'blocks',
+					'name' => 'content_blocks',
 					'type' => 'flexible_content',
 					'instructions' => '',
 					'required' => 0,
@@ -105,16 +121,10 @@ class acf_content_blocks {
 
 	public static function register_default_blocks($blocks){
 
-		$blocks_dir = dirname(__FILE__).'/blocks/';
-		if($files = glob($blocks_dir.'acfcb_block_*.php')){
-			foreach($files as $file){
-				$classname = str_ireplace(array($blocks_dir,'.php'), '', $file);
-				// error_log(var_export($file, true));
-				// error_log(var_export($classname, true));
-				include $file;
-				$blocks[] = $classname;
-			}
-		}
+		$blocks_dir = dirname(__FILE__).'/blocks';
+
+		// Text block
+		$blocks['text'] = $blocks_dir.'/text';
 
 		return $blocks;
 
@@ -143,7 +153,7 @@ class acf_content_blocks {
 	            ?>
 	            <div class="block block-<?php echo $row_layout ?>">
 	            <?php
-	            include locate_template('content_blocks/'.$row_layout.'.php');
+	            include locate_template('blocks/'.$row_layout.'.php');
 	            ?>
 	            </div>
 	            <?php
@@ -170,10 +180,18 @@ class acf_content_blocks {
 		while(have_rows('content_blocks')){
 
 			the_row();
-			ob_start();
-			include 'templates/content_block_fallbacks/'.get_row_layout('acf_fc_layout').'.php';
-			$output = ob_get_clean();
-			$content .= $output;
+			
+			$layout =  get_row_layout();
+			$name = str_ireplace('acfcb_block_', '', $layout);
+			
+			if($fallback_template = self::$fallback_templates[$name] and file_exists($fallback_template)){
+
+				ob_start();
+				include $fallback_template;
+				$output = ob_get_clean();
+				$content .= $output;
+
+			}
 
 		}
 
