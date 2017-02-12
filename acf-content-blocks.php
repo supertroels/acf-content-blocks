@@ -20,7 +20,7 @@ class acf_content_blocks {
 
 		include 'acfcb_block.php';
 
-		add_filter('acf_content_blocks/register_blocks', 'acf_content_blocks::register_default_blocks', 1, 1);
+		add_filter('acfcb/register_blocks', 'acf_content_blocks::register_default_blocks', 1, 1);
 
 		add_action('acf/init', 'acf_content_blocks::register_blocks');
 		add_action('acf/init', 'acf_content_blocks::register_content_blocks_field');
@@ -32,7 +32,7 @@ class acf_content_blocks {
 
 
 	public static function register_blocks(){
-		self::$registered_blocks = apply_filters('acf_content_blocks/register_blocks', array());
+		self::$registered_blocks = apply_filters('acfcb/register_blocks', array());
 	}
 
 
@@ -48,8 +48,14 @@ class acf_content_blocks {
 				if(file_exists($file)){
 					include $file;
 					$class = 'acfcb_block_'.$name;
-					if(method_exists($class, 'register_block'))
-						$blocks[$name] = call_user_func(array($class, 'register_block'));
+					$block = new $class();
+
+					if(method_exists($block, 'init'))
+						$block->init();
+
+					if(method_exists($block, 'export'))
+						$blocks[$name] = $block->export();
+
 				}
 
 				// Fallback template
@@ -63,11 +69,11 @@ class acf_content_blocks {
 
 
 		$group = array(
-			'key' 		=> 'group_wpcb000000001',
+			'key' 		=> 'group_acfcb'.hash('crc32', 'content_blocks_group_key'),
 			'title' 	=> 'Content blocks',
 			'fields' 	=> array(
 				array(
-					'key' => 'field_wpcb000000002',
+					'key' => 'field_acfcb'.hash('crc32', 'content_blocks_field_key'),
 					'label' => '',
 					'name' => 'content_blocks',
 					'type' => 'flexible_content',
@@ -85,7 +91,7 @@ class acf_content_blocks {
 					'layouts' => $blocks
 				)
 			),
-			'location' 	=> apply_filters('acf_content_blocks/location', array(
+			'location' 	=> apply_filters('acfcb/location', array(
 				array(
 					array(
 						'param' => 'post_type',
@@ -124,9 +130,9 @@ class acf_content_blocks {
 		$blocks_dir = dirname(__FILE__).'/blocks';
 
 		// Text block
-		$blocks['text'] = $blocks_dir.'/text';
-		$blocks['image'] = $blocks_dir.'/image';
-		$blocks['video'] = $blocks_dir.'/video';
+		$blocks['text'] 	= $blocks_dir.'/text';
+		$blocks['image'] 	= $blocks_dir.'/image';
+		$blocks['video'] 	= $blocks_dir.'/video';
 
 		return $blocks;
 

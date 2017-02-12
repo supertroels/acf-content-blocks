@@ -3,36 +3,15 @@
 class acfcb_block_video extends acfcb_block {
 
 
-	public static function register_block(){
+	public function init(){
 
-		$block = array (
-			'key' => self::get_field_key(1),
-			'name' => 'acfcb_block_video',
-			'label' => 'Video',
-			'display' => 'block',
-			'sub_fields' => array (
-				array (
-					'key' => 'field_'.self::get_field_key(2),
-					'label' => 'video',
-					'name' => self::get_field_prefix().'url',
-					'type' => 'oembed',
-					'instructions' => '',
-					'required' => 0,
-					'conditional_logic' => 0,
-					'wrapper' => array (
-						'width' => '',
-						'class' => '',
-						'id' => '',
-					),
-					'width' => '',
-					'height' => '',
-				),
-			),
-			'min' => '',
-			'max' => '',
-		);
+		$this->label = 'Video';
 
-		return apply_filters('acfcb_block/video', $block);
+		parent::__init();
+
+		$this->add_field('url')
+		->set('label', 'Video')
+		->set('type', 'oembed');
 
 	}
 

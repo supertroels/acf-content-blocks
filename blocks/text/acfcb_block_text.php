@@ -3,38 +3,19 @@
 class acfcb_block_text extends acfcb_block {
 
 
-	public static function register_block(){
+	public function init(){
 
-		$block = array(
-			'key' => self::get_field_key(1),
-			'name' => 'acfcb_block_text',
-			'label' => 'Text',
-			'display' => 'block',
-			'sub_fields' => array (
-				array (
-					'key' => 'field_'.self::get_field_key(2),
-					'label' => 'Content',
-					'name' => self::get_field_prefix().'content',
-					'type' => 'wysiwyg',
-					'instructions' => '',
-					'required' => 0,
-					'conditional_logic' => 0,
-					'wrapper' => array (
-						'width' => '',
-						'class' => '',
-						'id' => '',
-						),
-					'default_value' => '',
-					'tabs' => 'all',
-					'toolbar' => 'full',
-					'media_upload' => 1,
-					)
-				),
-			'min' => '',
-			'max' => '',
-			);
+		$this->label = 'Text';
 
-		return apply_filters('acfcb_block/text', $block);
+		parent::__init();
+
+		$this->add_field('content')
+		->set('label', '')
+		->set('type', 'wysiwyg')
+		->set('tabs', 'all')
+		->set('toolbar', 'full')
+		->set('media_upload', 1)
+		;
 
 	}
 
