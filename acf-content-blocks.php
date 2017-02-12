@@ -125,6 +125,8 @@ class acf_content_blocks {
 
 		// Text block
 		$blocks['text'] = $blocks_dir.'/text';
+		$blocks['image'] = $blocks_dir.'/image';
+		$blocks['video'] = $blocks_dir.'/video';
 
 		return $blocks;
 
