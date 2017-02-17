@@ -3,11 +3,11 @@
 class acfcb_block_text extends acfcb_block {
 
 
-	public function init(){
+	public function __construct(){
 
 		$this->label = 'Text';
 
-		parent::__init();
+		parent::__construct();
 
 		$this->add_field('content')
 		->set('label', '')

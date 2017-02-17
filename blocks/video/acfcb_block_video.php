@@ -3,11 +3,11 @@
 class acfcb_block_video extends acfcb_block {
 
 
-	public function init(){
+	public function __construct(){
 
 		$this->label = 'Video';
 
-		parent::__init();
+		parent::__construct();
 
 		$this->add_field('url')
 		->set('label', 'Video')

@@ -3,11 +3,11 @@
 class acfcb_block_image extends acfcb_block {
 
 
-	public function init(){
+	public function __construct(){
 
 		$this->label = 'Image';
 
-		parent::__init();
+		parent::__construct();
 
 		$this->add_field('file')
 		->set('label', 'Image')

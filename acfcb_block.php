@@ -6,7 +6,7 @@ class acfcb_block {
 	public $label = '';
 	public $block = false;
 
-	public function __init(){
+	public function __construct(){
 
 		$this->block = array(
 			'key' => $this->get_field_key(0),

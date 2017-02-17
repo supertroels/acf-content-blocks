@@ -50,8 +50,8 @@ class acf_content_blocks {
 					$class = 'acfcb_block_'.$name;
 					$block = new $class();
 
-					if(method_exists($block, 'init'))
-						$block->init();
+					// if(method_exists($block, 'init'))
+					// 	$block->init();
 
 					if(method_exists($block, 'export'))
 						$blocks[$name] = $block->export();
@@ -158,7 +158,7 @@ class acf_content_blocks {
 
 	        	$row_layout = get_row_layout();
 				$name = str_ireplace('acfcb_block_', '', $row_layout);
-
+				$block = new $row_layout();
 	            ?>
 	            <div class="block block-<?php echo $name ?>">
 	            <?php
