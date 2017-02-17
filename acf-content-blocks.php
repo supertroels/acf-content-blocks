@@ -157,11 +157,12 @@ class acf_content_blocks {
 	        while ( have_rows('content_blocks') ) : the_row();
 
 	        	$row_layout = get_row_layout();
+				$name = str_ireplace('acfcb_block_', '', $row_layout);
 
 	            ?>
-	            <div class="block block-<?php echo $row_layout ?>">
+	            <div class="block block-<?php echo $name ?>">
 	            <?php
-	            include locate_template('blocks/'.$row_layout.'.php');
+	            include locate_template('blocks/'.$name.'.php');
 	            ?>
 	            </div>
 	            <?php
@@ -189,7 +190,7 @@ class acf_content_blocks {
 
 			the_row();
 			
-			$layout =  get_row_layout();
+			$layout = get_row_layout();
 			$name = str_ireplace('acfcb_block_', '', $layout);
 			
 			if($fallback_template = self::$fallback_templates[$name] and file_exists($fallback_template)){
