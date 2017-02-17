@@ -11,12 +11,14 @@ class acf_content_blocks {
 	public static $registered_blocks = array();
 	public static $fallback_templates = array();
 	public static $updating = false;
-
+	public static $path = '';
 
 	public static function init(){
 
 		if(!self::check_dependencies())
 			return null;
+
+		self::$path = dirname(__FILE__);
 
 		include 'acfcb_block.php';
 
@@ -27,6 +29,20 @@ class acf_content_blocks {
 
 		add_filter('the_content', 'acf_content_blocks::do_blocks', 1, 1);
 		add_filter('save_post', 'acf_content_blocks::update_fallback_content', 10, 1 );
+
+
+		spl_autoload_register('acf_content_blocks::register_autoloader');
+
+	}
+
+
+	public static function register_autoloader($class){
+
+			if(stristr($class, 'acfcb_')){
+				$file = self::$path.'/'.$class.'.php';
+				if(file_exists($file))
+					require_once($file);
+			}
 
 	}
 
@@ -50,11 +66,13 @@ class acf_content_blocks {
 					$class = 'acfcb_block_'.$name;
 					$block = new $class();
 
-					// if(method_exists($block, 'init'))
-					// 	$block->init();
+					$block = apply_filters('acfcb/block', $block, $name);
+					$block = apply_filters('acfcb/block/'.$name, $block, $name);
 
 					if(method_exists($block, 'export'))
 						$blocks[$name] = $block->export();
+					else
+						unset($blocks[$name]);
 
 				}
 
@@ -159,18 +177,40 @@ class acf_content_blocks {
 	        	$row_layout = get_row_layout();
 				$name = str_ireplace('acfcb_block_', '', $row_layout);
 				$block = new $row_layout();
+				do_action('acfcb/before_block', $name, $block);
 	            ?>
-	            <div class="block block-<?php echo $name ?>">
+	            <div class="block block-<?php echo $name ?> <?php echo implode(' ', apply_filters('acfcb/block/classes', array(), $name, $block)) ?>" <?php self::print_attributes($name, $block) ?>>
 	            <?php
-	            include locate_template('blocks/'.$name.'.php');
+	            do_action('acfcb/begin_block', $name, $block);
+	            $path = apply_filters('acfcb/template_path', 'blocks/', $name, $block);
+	            include locate_template($path.$name.'.php');
+	           	do_action('acfcb/end_block', $name, $block);
 	            ?>
 	            </div>
 	            <?php
+	           	do_action('acfcb/after_block', $name, $block);
 	        endwhile;
 	        $content = ob_get_clean();
 	    endif;
 
 		return $content;
+
+	}
+
+
+	public static function print_attributes($name, $block){
+
+		$attr = apply_filters('acfcb/block/attributes', array(), $name, $block);
+
+		if(!$attr or !is_array($attr))
+			return;
+
+		$output = '';
+
+		foreach($attr as $key => $value)
+			$output = " ".$key."='".$value."'";
+
+		echo $output;
 
 	}
 

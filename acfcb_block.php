@@ -8,9 +8,11 @@ class acfcb_block {
 
 	public function __construct(){
 
+		$class = get_class($this);
+
 		$this->block = array(
-			'key' => $this->get_field_key(0),
-			'name' => get_class($this),
+			'key' => $this->get_field_key($class),
+			'name' => $class,
 			'label' => $this->label,
 			'display' => 'block',
 			'sub_fields' => array(),
@@ -23,22 +25,8 @@ class acfcb_block {
 
 
 	public function get_field_key($name){
-		
-		// $handle 		= hash('crc32', get_class($this));
-		// $index_length 	= strlen($index);
-		// $max_length 	= (13 - $index_length);
-
-		// if(strlen($handle) > $max_length)
-		// 	$handle = substr($handle, 0, $max_length);
-		
-		// $diff = $max_length - strlen($handle.$index_length);
-		// if($diff >= 0)
-		// 	$handle = $handle.str_repeat('0', $diff+1);
-
-		//$key = substr($handle.$index, 0, 13);
 
 		$key = 'acfcb'.hash('crc32', $this->get_field_prefix().$name);
-
 		return $key;
 
 	}
@@ -60,7 +48,7 @@ class acfcb_block {
 		return $field;
 
 	}
-
+	
 
 	public function export(){
 
@@ -72,6 +60,19 @@ class acfcb_block {
 
 		return $this->block;
 
+	}
+
+
+	// Content methods
+
+	public function get_field($name){
+		$field = $this->get_field_prefix().$name;
+        return get_sub_field($field);
+	}
+
+
+	public function the_field($name){
+		echo $this->get_field($name);
 	}
 
 
