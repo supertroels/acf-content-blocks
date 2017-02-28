@@ -137,6 +137,8 @@ class acf_content_blocks {
 			'description' 			=> '',
 		);
 
+		$group = apply_filters('acfcb/field_group', $group);
+
 		acf_add_local_field_group($group);
 
 
