@@ -30,8 +30,17 @@ class acf_content_blocks {
 		add_filter('the_content', 'acf_content_blocks::do_blocks', 1, 1);
 		add_filter('save_post', 'acf_content_blocks::update_fallback_content', 10, 1 );
 
+		add_action('after_setup_theme', 'acf_content_blocks::remove_autop');
 
 		spl_autoload_register('acf_content_blocks::register_autoloader');
+
+	}
+
+
+	public static function remove_autop(){
+		
+		remove_filter('the_content', 'wpautop');
+		remove_filter('the_excerpt', 'wpautop');
 
 	}
 
