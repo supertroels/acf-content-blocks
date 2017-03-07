@@ -13,6 +13,10 @@ class acfcb_block_image extends acfcb_block {
 		->set('label', 'Image')
 		->set('type', 'image');
 
+		$this->add_field('link')
+		->set('label', 'Link')
+		->set('type', 'url');
+
 	}
 
 
