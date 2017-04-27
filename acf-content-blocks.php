@@ -245,7 +245,7 @@ class acf_content_blocks {
 			$name = str_ireplace('acfcb_block_', '', $layout);
 			
 			if($fallback_template = self::$fallback_templates[$name] and file_exists($fallback_template)){
-
+				$block = new $layout();
 				ob_start();
 				include $fallback_template;
 				$output = ob_get_clean();
