@@ -131,7 +131,7 @@ class acfcb_field {
 	 **/
 	
 	public function add_sub_field($field_object){
-		if($this->type !== 'repeater' or !$this->_is_layout){
+		if($this->type !== 'repeater' and !$this->_is_layout){
 			error_log('Tried to set a sub-field on a non-repeater field');
 			return $this;
 		}
