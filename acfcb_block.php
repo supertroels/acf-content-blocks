@@ -17,7 +17,7 @@ class acfcb_block {
 			'display' => 'block',
 			'sub_fields' => array(),
 			'min' => '',
-			'max' => '',
+			'max' => ''
 		);
 
 	}

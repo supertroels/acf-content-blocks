@@ -12,13 +12,14 @@ class acf_content_blocks {
 	public static $fallback_templates = array();
 	public static $updating = false;
 	public static $path = '';
-
+	public static $url = '';
 	public static function init(){
 
 		if(!self::check_dependencies())
 			return null;
 
 		self::$path = dirname(__FILE__);
+		self::$url 	= plugin_dir_url('acf-content-blocks/acf-content-blocks.php');
 
 		include 'acfcb_block.php';
 
@@ -31,6 +32,10 @@ class acf_content_blocks {
 		add_filter('save_post', 'acf_content_blocks::update_fallback_content', 10, 1 );
 
 		add_action('after_setup_theme', 'acf_content_blocks::remove_autop');
+
+		add_filter('acfcb/block', 'acf_content_blocks::add_block_layout_fields', 10, 2);
+		add_filter('acfcb/block/attributes', 'acf_content_blocks::add_block_attributes', 10, 3);
+		add_action('acf/input/admin_enqueue_scripts', 'acf_content_blocks::add_admin_assets');
 
 		spl_autoload_register('acf_content_blocks::register_autoloader');
 
@@ -110,7 +115,7 @@ class acf_content_blocks {
 					'wrapper' => array (
 						'width' => '',
 						'class' => '',
-						'id' => '',
+						'id' => 'acfcb-content-blocks',
 					),
 					'button_label' => 'Add block',
 					'min' => '',
@@ -150,6 +155,54 @@ class acf_content_blocks {
 
 		acf_add_local_field_group($group);
 
+
+	}
+
+
+	public static function add_block_layout_fields($block, $name){
+
+		$cols = apply_filters('acfcb/block/coloumns', 12, $name, $block);
+
+		$block->add_field('block_width')
+		->set('type', 'number')
+		->set('min', 1)
+		->set('max', $cols)
+		->set('step', 1)
+		->set('append', 'columns')
+		->default_value($cols)
+		;
+
+		// $block->add_field('block_handle')
+		// ->set('type', 'text')
+		// ;
+
+		return $block;
+
+	}
+
+
+	public static function add_block_attributes($attrs, $name, $block){
+
+
+		$width = $block->get_field('block_width');
+		$attrs['data-block-cols'] = $width;
+
+		return $attrs;
+
+
+	}
+
+
+	public static function add_admin_assets(){
+
+	// register style
+    wp_register_style('acfcb-admin-css', self::$url.'/admin/assets/css/acfcb-admin.css');
+    wp_enqueue_style('acfcb-admin-css');
+    
+    
+    // register script
+    wp_register_script('acfcb-admin-js', self::$url.'/admin/assets/js/acfcb-admin.js');
+    wp_enqueue_script('acfcb-admin-js');
 
 	}
 
