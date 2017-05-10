@@ -19,7 +19,9 @@ window.block_layout_handler = function(block){
 		_.hide_original_layout_elements();
 		_.setup_proxy_layout_elements();
 		_.create_overlay();
+		//_.create_offsets();
 		_.add_classes();
+		_.make_block_resizable();
 		_.bind();
 
 
@@ -33,6 +35,8 @@ window.block_layout_handler = function(block){
 
 		_.hide_cb_box(function(){});
 
+		_.elems.block.addClass('acfcb_arrange_init');
+
 
 	}
 
@@ -43,7 +47,9 @@ window.block_layout_handler = function(block){
 		_.elems.proxy 			= jQuery('<input class="proxy-width" type="number" val="100">');
 		_.elems.handle 			= _.elems.block.find('.acf-fc-layout-handle');
 		_.elems.acf_fields 		= _.elems.block.find('.acf-fields');
+		_.elems.sortable 		= _.elems.acf_fields.find('.values')
 		_.elems.overlay 		= _.elems.acf_fields.find('.acf-overlay')
+		_.elems.block_extra		= $('<div class="block-extra"></div>').appendTo(_.elems.block)
 
 	}
 
@@ -97,9 +103,102 @@ window.block_layout_handler = function(block){
 	}
 
 
+	_.create_offsets = function(){
+		
+		_.elems.offset_left = $('<div class="offset offset-left"></div>');
+		_.elems.offset_right = $('<div class="offset offset-right"></div>');
+
+		_.elems.block.prepend(_.elems.offset_left).append(_.elems.offset_right)
+
+	}
+
+
 	_.add_classes = function(){
 		_.elems.acf_fields
 		.addClass('float')
+	}
+
+
+	_.change_columns = function(cols){
+		_.elems.width_input.val(cols).change()
+	}
+
+
+	_.make_block_resizable = function(){
+
+		_.elems.resizer = $('<a class="resizer acf-icon -arrow-combo small"></a>')
+		_.elems.block_extra.append(_.elems.resizer);
+
+		var container 	= _.elems.block.parents('#acfcb-content-blocks').eq(0);
+		var max_cols	= 12;
+
+		_.elems.resizer.draggable({
+			containment: _.elems.acf_fields.find('.values'),
+			axis: 'x',
+			start: function(e, ui){
+				_.elems.sortable.sortable('disable')
+			},
+			drag: function(e, ui){
+
+				var part_size 		= container.width()/max_cols;
+				var left 			= ui.position.left;
+				var cols 			= Math.ceil(left/part_size);
+
+				if(cols < 1)
+					cols = 1;
+				else if (cols > max_cols)
+					cols = max_cols;
+
+				_.change_columns(cols)
+
+			},
+			stop: function(e, ui){
+				_.elems.sortable.sortable('enable')
+			}
+		});
+
+	}
+
+	_.on_drag = function(elem, drag_callback, stop_callback){
+
+		if(typeof drag_callback != 'function')
+			drag_callback = function(){};
+
+		if(typeof stop_callback != 'function')
+			stop_callback = function(){};
+
+
+		var dragged = false;
+		var grabbed = false;
+
+		elem
+		.mousedown(function() {
+		    
+		    grabbed = true;
+
+			$(window).mousemove(function() {
+
+			    if(grabbed){
+				    dragged = true;
+
+				    drag_callback();
+
+					$(window).one('mouseup', function(){
+					
+					    if(dragged) {
+					        stop_callback();
+					        grabbed = false
+						    dragged = false;
+					    }
+
+					});
+
+				}
+
+			 })
+
+		})
+
 	}
 
 

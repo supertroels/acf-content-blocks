@@ -35,6 +35,7 @@ class acf_content_blocks {
 
 		add_filter('acfcb/block', 'acf_content_blocks::add_block_layout_fields', 10, 2);
 		add_filter('acfcb/block/attributes', 'acf_content_blocks::add_block_attributes', 10, 3);
+		
 		add_action('acf/input/admin_enqueue_scripts', 'acf_content_blocks::add_admin_assets');
 
 		spl_autoload_register('acf_content_blocks::register_autoloader');
