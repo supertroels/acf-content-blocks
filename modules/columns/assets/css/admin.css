@@ -118,7 +118,7 @@
     background-color: grey;
     position: absolute;
     top: 0;
-    display: none;
+    /*display: none;*/
 }
 
 .offset-right{

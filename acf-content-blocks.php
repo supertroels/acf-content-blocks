@@ -33,12 +33,28 @@ class acf_content_blocks {
 
 		add_action('after_setup_theme', 'acf_content_blocks::remove_autop');
 
-		add_filter('acfcb/block', 'acf_content_blocks::add_block_layout_fields', 10, 2);
-		add_filter('acfcb/block/attributes', 'acf_content_blocks::add_block_attributes', 10, 3);
-		
-		add_action('acf/input/admin_enqueue_scripts', 'acf_content_blocks::add_admin_assets');
-
 		spl_autoload_register('acf_content_blocks::register_autoloader');
+
+		add_action('after_setup_theme', 'acf_content_blocks::load_modules');
+
+	}
+
+
+	public static function load_modules(){
+
+		$modules = apply_filters('acfcb/modules', array());
+
+		foreach($modules as $module => $enable){
+			
+			if(!$enable)
+				continue;
+
+			$module = strtolower($module);
+			include self::$path.'/modules/'.$module.'/init.php';
+			$class = 'acfcb_module_'.$module;
+			call_user_func(array($class, 'init'));
+
+		}
 
 	}
 
@@ -159,53 +175,6 @@ class acf_content_blocks {
 
 	}
 
-
-	public static function add_block_layout_fields($block, $name){
-
-		$cols = apply_filters('acfcb/block/coloumns', 12, $name, $block);
-
-		$block->add_field('block_width')
-		->set('type', 'number')
-		->set('min', 1)
-		->set('max', $cols)
-		->set('step', 1)
-		->set('append', 'columns')
-		->default_value($cols)
-		;
-
-		// $block->add_field('block_handle')
-		// ->set('type', 'text')
-		// ;
-
-		return $block;
-
-	}
-
-
-	public static function add_block_attributes($attrs, $name, $block){
-
-
-		$width = $block->get_field('block_width');
-		$attrs['data-block-cols'] = $width;
-
-		return $attrs;
-
-
-	}
-
-
-	public static function add_admin_assets(){
-
-	// register style
-    wp_register_style('acfcb-admin-css', self::$url.'/admin/assets/css/acfcb-admin.css');
-    wp_enqueue_style('acfcb-admin-css');
-    
-    
-    // register script
-    wp_register_script('acfcb-admin-js', self::$url.'/admin/assets/js/acfcb-admin.js');
-    wp_enqueue_script('acfcb-admin-js');
-
-	}
 
 
 	public static function register_default_blocks($blocks){
