@@ -205,6 +205,9 @@ class acf_content_blocks {
 
 		if(have_rows('content_blocks')):
 	     	ob_start();
+
+	     	do_action('acfcb/before_blocks');
+	     	
 	         // loop through the rows of data
 	        while ( have_rows('content_blocks') ) : the_row();
 
@@ -224,6 +227,9 @@ class acf_content_blocks {
 	            <?php
 	           	do_action('acfcb/after_block', $name, $block);
 	        endwhile;
+
+	       	do_action('acfcb/after_blocks');
+
 	        $content = ob_get_clean();
 	    endif;
 
