@@ -38,7 +38,7 @@ class acfcb_module_columns {
 
 	public static function add_block_layout_fields($block, $name){
 
-		$cols = apply_filters('acfcb/block/coloumns', 12, $name, $block);
+		$cols = apply_filters('acfcb/block/columns', 12, $name, $block);
 
 		$block->add_field('block_width')
 		->set('type', 'number')
