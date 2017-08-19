@@ -282,13 +282,16 @@ class acf_content_blocks {
 			
 			$layout = get_row_layout();
 			$name = str_ireplace('acfcb_block_', '', $layout);
-			
 			$block = new $layout();
+
 			ob_start();
-			if($fallback_template = self::$fallback_templates[$name] and file_exists($fallback_template))
+			if($fallback_template = self::$fallback_templates[$name] and file_exists($fallback_template)){
 				include $fallback_template;
-			else
+			}
+			else {
 				self::do_block($name, $block);
+			}
+
 			$output = ob_get_clean();
 			$content .= $output;
 
