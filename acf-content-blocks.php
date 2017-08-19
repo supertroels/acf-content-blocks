@@ -109,6 +109,7 @@ class acf_content_blocks {
 
 				// Fallback template
 				$file = $dir.'/fallback.php';
+				$file = $dir.'/fallback.php';
 				if(file_exists($file)){
 					self::$fallback_templates[$name] = $file;
 				}
@@ -214,18 +215,9 @@ class acf_content_blocks {
 	        	$row_layout = get_row_layout();
 				$name = str_ireplace('acfcb_block_', '', $row_layout);
 				$block = new $row_layout();
-				do_action('acfcb/before_block', $name, $block);
-	            ?>
-	            <div class="block block-<?php echo $name ?> <?php echo implode(' ', apply_filters('acfcb/block/classes', array(), $name, $block)) ?>" <?php self::print_attributes($name, $block) ?>>
-	            <?php
-	            do_action('acfcb/begin_block', $name, $block);
-	            $path = apply_filters('acfcb/template_path', 'blocks/', $name, $block);
-	            include locate_template($path.$name.'.php');
-	           	do_action('acfcb/end_block', $name, $block);
-	            ?>
-	            </div>
-	            <?php
-	           	do_action('acfcb/after_block', $name, $block);
+
+				self::do_block($name, $block);
+
 	        endwhile;
 
 	       	do_action('acfcb/after_blocks');
@@ -234,6 +226,24 @@ class acf_content_blocks {
 	    endif;
 
 		return $content;
+
+	}
+
+
+	public static function do_block($name, $block){
+
+		do_action('acfcb/before_block', $name, $block);
+	    ?>
+	    <div class="block block-<?php echo $name ?> <?php echo implode(' ', apply_filters('acfcb/block/classes', array(), $name, $block)) ?>" <?php self::print_attributes($name, $block) ?>>
+	    <?php
+	    do_action('acfcb/begin_block', $name, $block);
+	    $path = apply_filters('acfcb/template_path', 'blocks/', $name, $block);
+	    include locate_template($path.$name.'.php');
+	    do_action('acfcb/end_block', $name, $block);
+	    ?>
+	    </div>
+	    <?php
+	    do_action('acfcb/after_block', $name, $block);
 
 	}
 
@@ -273,14 +283,14 @@ class acf_content_blocks {
 			$layout = get_row_layout();
 			$name = str_ireplace('acfcb_block_', '', $layout);
 			
-			if($fallback_template = self::$fallback_templates[$name] and file_exists($fallback_template)){
-				$block = new $layout();
-				ob_start();
+			$block = new $layout();
+			ob_start();
+			if($fallback_template = self::$fallback_templates[$name] and file_exists($fallback_template))
 				include $fallback_template;
-				$output = ob_get_clean();
-				$content .= $output;
-
-			}
+			else
+				self::do_block($name, $block);
+			$output = ob_get_clean();
+			$content .= $output;
 
 		}
 
