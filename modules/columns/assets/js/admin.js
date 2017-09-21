@@ -1,155 +1,242 @@
-window.block_layout_handler = function(block){
-
-	var _ = {};
+window.column_block = function(block){
 
 	var $ = jQuery;
 
-	_.elems = {
-		block: block
+
+	var _ = {
+		mode: null,
+		data: {},
+		elems: {
+			block: block
+		}
 	};
+
 
 
 	_.init = function(){
 
+		_.set_mode('l');
 
-		// Initial collection
+		_.elems.block.addClass('column-block');
+
+		// Hide
 		_.collect_elements();
 
-		// Setup functions
-		_.hide_original_layout_elements();
-		_.setup_proxy_layout_elements();
-		_.create_overlay();
-		//_.create_offsets();
-		_.add_classes();
-		_.make_block_resizable();
-		_.bind();
-
-
-		// Initial setup
-		if(!_.elems.block.hasClass('-collapsed')){
-
-			_.elems.handle
-			.click();
-
-		}
-
-		_.hide_cb_box(function(){});
-
-		_.elems.block.addClass('acfcb_arrange_init');
+		
+		// Setup overlay
+		_.init_block();
 
 
 	}
+
+
 
 	_.collect_elements = function(){
-
-		_.elems.handle_input 	= _.elems.block.find('[data-name$="_block_handle"] .acf-input input[type="text"]');
-		_.elems.width_input		= _.elems.block.find('[data-name$="_block_width"] .acf-input input[type="number"]');
-		_.elems.proxy 			= jQuery('<input class="proxy-width" type="number" val="100">');
+		
+		_.elems.data_field 		= _.elems.block.find('.block-cols-data .acf-input input[type="text"]');
+		_.elems.parent 			= $('#acfcb-content-blocks');
 		_.elems.handle 			= _.elems.block.find('.acf-fc-layout-handle');
+		_.elems.cols_inputs 	= _.elems.block.find('.acf-field[data-name$="_cols"]');
+		_.elems.offset_inputs 	= _.elems.block.find('.acf-field[data-name$="_offset"]');
 		_.elems.acf_fields 		= _.elems.block.find('.acf-fields');
-		_.elems.sortable 		= _.elems.acf_fields.find('.values')
-		_.elems.overlay 		= _.elems.acf_fields.find('.acf-overlay')
+		_.elems.overlay 		= $('<div class="acf-cols-overlay"></div>').appendTo(_.elems.block);
 		_.elems.block_extra		= $('<div class="block-extra"></div>').appendTo(_.elems.block)
+		_.elems.sortable 		= _.elems.acf_fields.find('.values')
+		_.elems.resizer			= $('<a class="resizer acf-icon -arrow-combo small"></a>').appendTo(_.elems.block_extra);
+		_.elems.mode_select		= $('#block-cols-mode');
 
 	}
 
 
+	_.init_block = function(){
 
-	_.hide_original_layout_elements = function(){
-
-		_.elems.width_input.parents('.acf-field').eq(0).css('display', 'none');
-		_.elems.handle_input.parents('.acf-field').eq(0).css('display', 'none');
-
-	}
+		// Read data from block
+		_.fetch_block_data()
 
 
-	_.setup_proxy_layout_elements = function(){
+		// Click overlay closes edit screen
+		_.elems.overlay.click(_.toggle)
 
-		_.elems.proxy
-		.val(_.elems.width_input.val())
-		.attr({
-			'min': _.elems.width_input.attr('min'),
-			'max': _.elems.width_input.attr('max'),
-			'step': _.elems.width_input.attr('step'),
+		// Inital hiding of any open edit screens
+		if(_.is_closed()) 
+			_.toggle();
+
+
+		_.init_resizeable_block();
+
+		
+
+		// Bind to changes for columns
+		_.bind_cols_inputs();
+
+
+		// Listen to mode switcher
+		_.elems.mode_select.change(function(){
+			_.set_mode(_.elems.mode_select.val());
 		})
-		.change(function(){
-			_.elems.width_input.val(_.elems.proxy.val()).change()
+		.change();
+
+
+
+		// Offsetting functionality
+		_.setup_offsetting();
+
+	}
+
+
+	_.bind_cols_inputs = function(){
+
+		_.elems.cols_inputs.each(function(k, el){
+
+			var self 	= $(el);
+			var mode 	= self.find('.acf-label label').text();
+			var input 	= self.find('.acf-input input');
+
+			input.change(function(){
+
+				if(_.mode != mode)
+					return;
+
+				var cols		= _.data[mode].cols;
+				var min_cols	= _.data[mode].min;
+				var max_cols	= _.data[mode].max;
+
+				var col_width	= 100/cols;
+				var col_pad		= 5;
+
+				var val 		= parseInt(input.val());
+				var width 		= val * col_width;
+				var calc_pad	= col_pad - 2;
+
+				_.elems.block.css('width', 'calc('+width+'% - '+calc_pad+'px)');
+
+			}).change();
+
+		})
+
+		
+		_.elems.block.on('mode_switch', function(){
+			_.elems.cols_inputs.find('.acf-input input').change();
+			_.elems.offset_inputs.find('.acf-input input').change();
 		})
 
 
-		_.elems.proxy_input = jQuery('<div class="proxy-wrapper acf-input"><div class="acf-input-append">columns</div><div class="acf-input-wrap"></div></div>')
-	
+	}
+
+
+	_.setup_offsetting = function(){
 		
-		_.elems.proxy_input
-		.find('.acf-input-wrap')
-		.prepend(_.elems.proxy)
-
-		_.elems.proxy_input
-		.prependTo(_.elems.block);
+		_.bind_offset_inputs();
 
 	}
 
 
-	_.create_overlay = function(){
-		
-		if(_.elems.overlay.length >= 1)
-			return null;
+	_.bind_offset_inputs = function(){
 
-		_.elems.overlay 	= jQuery('<div class="acf-overlay"></div>');
-		
-		_.elems.overlay
-		.appendTo(_.elems.acf_fields)
+		_.elems.offset_inputs.each(function(k, el){
+
+			var self 	= $(el);
+			var mode 	= self.find('.acf-label label').text();
+			var input 	= self.find('.acf-input input');
+
+			input.change(function(){
+
+				if(_.mode != mode)
+					return;
+
+				var position 	= 'right';
+				if(self.hasClass('left'))
+					position = 'left';
+
+				var cols		= _.data[mode].cols;
+				var min_cols	= _.data[mode].min;
+				var max_cols	= _.data[mode].max;
+
+				var col_width	= 100/cols;
+				var col_pad		= 5;
+
+				var val 		= parseInt(input.val());
+
+				var width 		= val * col_width;
+				var calc_pad	= col_pad - 2;
+
+
+				if(val <= 0){
+					var attr = 0;
+				}
+				else{
+					var attr = 'calc('+width+'% - '+calc_pad+'px)';
+				}
+
+				_.elems.block.css('margin-'+position, attr, 'important');
+				_.elems.resizer.trigger('drag')
+
+			}).change();
+
+		})
+
+
+		_.elems.block.on('mode_switch', function(){
+			_.elems.cols_inputs.find('.acf-input input').change();
+			_.elems.offset_inputs.find('.acf-input input').change();
+		})
+
 
 	}
 
 
-	_.create_offsets = function(){
-		
-		_.elems.offset_left = $('<div class="offset offset-left"></div>');
-		_.elems.offset_right = $('<div class="offset offset-right"></div>');
 
-		_.elems.block.prepend(_.elems.offset_left).append(_.elems.offset_right)
+	_.fetch_block_data = function(){
+
+		_.data = JSON.parse(_.elems.data_field.val());
 
 	}
 
 
-	_.add_classes = function(){
-		_.elems.acf_fields
-		.addClass('float')
+	_.toggle = function(){
+		return _.elems.handle.click();
 	}
 
 
-	_.change_columns = function(cols){
-		_.elems.width_input.val(cols).change()
+	_.is_closed = function(){
+		return !_.elems.block.hasClass('-collapsed');
 	}
 
 
-	_.make_block_resizable = function(){
+	_.set_mode = function(mode){
 
-		_.elems.resizer = $('<a class="resizer acf-icon -arrow-combo small"></a>')
-		_.elems.block_extra.append(_.elems.resizer);
+		_.mode = mode;
+		_.elems.block.trigger('mode_switch')
 
-		var container 	= _.elems.block.parents('#acfcb-content-blocks').eq(0);
-		var max_cols	= 12;
+	}
+
+
+	_.init_resizeable_block = function(){
+
+		var container 	= _.elems.parent.eq(0);
 
 		_.elems.resizer.draggable({
-			containment: _.elems.acf_fields.find('.values'),
+			containment: container,
 			axis: 'x',
 			start: function(e, ui){
-				_.elems.sortable.sortable('disable')
+				_.elems.sortable.sortable('disable');
 			},
 			drag: function(e, ui){
 
-				var part_size 		= container.width()/max_cols;
+				var cols		= _.data[_.mode].cols;
+				var min_cols	= _.data[_.mode].min;
+				var max_cols	= _.data[_.mode].max;
+
+				var part_size 		= container.width()/cols;
 				var left 			= ui.position.left;
-				var cols 			= Math.ceil(left/part_size);
+				var set_cols 		= Math.ceil(left/part_size);
 
-				if(cols < 1)
-					cols = 1;
-				else if (cols > max_cols)
-					cols = max_cols;
+				if(set_cols < min_cols)
+					set_cols = min_cols;
+				else if (set_cols > max_cols)
+					set_cols = max_cols;
 
-				_.change_columns(cols)
+				_.set_cols(set_cols, _.mode)
 
 			},
 			stop: function(e, ui){
@@ -159,129 +246,19 @@ window.block_layout_handler = function(block){
 
 	}
 
-	_.on_drag = function(elem, drag_callback, stop_callback){
 
-		if(typeof drag_callback != 'function')
-			drag_callback = function(){};
+	_.set_placeholder_width = function(){
 
-		if(typeof stop_callback != 'function')
-			stop_callback = function(){};
-
-
-		var dragged = false;
-		var grabbed = false;
-
-		elem
-		.mousedown(function() {
-		    
-		    grabbed = true;
-
-			$(window).mousemove(function() {
-
-			    if(grabbed){
-				    dragged = true;
-
-				    drag_callback();
-
-					$(window).one('mouseup', function(){
-					
-					    if(dragged) {
-					        stop_callback();
-					        grabbed = false
-						    dragged = false;
-					    }
-
-					});
-
-				}
-
-			 })
-
-		})
+		_.elems.parent.find('.ui-sortable-placeholder').width(_.elems.block.width());
 
 	}
 
 
-	_.bind = function(){
+	_.set_cols = function(cols, mode){
 
+		var input = _.elems.cols_inputs.filter('[data-name$="_block_'+mode+'_cols"]').find('.acf-input input[type="number"]')
+		input.val(cols).change()
 
-		_.elems.overlay
-		.click(function(){
-			
-			_.hide_cb_box(function(){
-				_.elems.handle.click();
-			});
-
-		});
-
-
-		_.elems.handle
-		.click(function(){
-
-			if(!_.elems.block.hasClass('-collapsed'))
-				return null;
-
-			_.elems.overlay
-			.animate({opacity: 1, width: '30%'}, 200);
-
-			_.elems.acf_fields
-			.animate({'right': '0%'}, 200)
-
-		})
-
-
-
-		_.elems.acf_fields
-		.on("keypress", function(e) {
-		          /* ENTER PRESSED*/
-		          if(!_.elems.block.hasClass('-collapsed') && e.keyCode == 13) {
-		          	hide_cb_box(function(){
-		          		_.elems.handle.click()
-		          	});
-		              e.stopPropagation();
-		              e.preventDefault()
-		          }
-		      });
-
-
-
-		_.elems.width_input
-		.change(function(){
-
-			var val 	= parseInt(_.elems.width_input.val());
-			var width 	= val * (100/12);
-			
-			var offset  = 10;
-			
-			if(val > 10)
-				offset = 15;
-
-			if(val < 8)
-				offset = 12;
-
-			_.elems.block.css('width', 'calc('+width+'% - '+offset+'px)')
-		})
-		.change()
-
-	}
-
-
-
-	_.hide_cb_box = function(callback){
-
-		if(typeof callback != 'function')
-			callback = function(){};
-
-		_.elems.overlay
-		.animate({opacity: 0, width: '100%'}, 200, function(){
-				//overlay.removeAttr('style')
-		});
-
-		_.elems.acf_fields
-		.animate({'right': '-100%'}, 200, function(){
-			//acf_fields.removeAttr('style');
-			callback()
-		});
 	}
 
 
@@ -291,19 +268,26 @@ window.block_layout_handler = function(block){
 	return _;
 
 
-};
+}
 
 
-
-// Init
 acf.add_action('append', function($el){
-	new block_layout_handler($el);
+
+	if(!$el.is('[data-layout^="acfcb_block_"]'))
+		return null;
+
+	new column_block($el);
+
 });
 
+
 jQuery(document).ready(function($) {
-	var blocks = $('.acf-field .layout');
+	
+	var blocks = $('[data-layout^="acfcb_block_"]').not('.acf-clone');
 	blocks.each(function(k, block){
 		var block = $(block);
-		new block_layout_handler(block);
+		new column_block(block);
 	})
+
+
 });

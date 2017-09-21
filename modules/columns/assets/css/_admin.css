@@ -1,0 +1,145 @@
+.acf-flexible-content .values {
+    text-align: left;
+    width: calc(100% + 13px);
+}
+
+.acf-flexible-content .layout,
+.acf-flexible-content .layout.ui-sortable-placeholder {
+	display: inline-block;
+	margin: 0 0 4px 0!important;
+	vertical-align: top;
+}
+
+/*.acf-flexible-content .layout:nth-child(odd) {
+	margin-left: 0!important;
+}*/
+
+.acf-flexible-content .layout.ui-sortable-placeholder {
+	float: none;
+}
+
+.layout .acf-fc-layout-handle {
+	border-bottom: none!important;
+	background-color: #fcfcfc;
+}
+
+.layout.-collapsed .acf-fc-layout-handle {
+	border-bottom: none!important;
+	background-color: #ffffff;
+}
+
+
+.acf-fields.float {
+
+	position: fixed;
+    background: #fff;
+   	width: 70%;
+    top: calc(0% + 32px);
+    right: 0%;
+    z-index: 9999;
+    overflow: scroll;
+    height: calc(100% - 32px);
+
+}
+
+.acf-overlay {
+	content: '';
+	display: block;
+	position: fixed;
+    background: rgba(0,0,0,0.5);
+    width: 30%;
+    top: calc(0% + 32px);
+    left: 0%;
+    z-index: 9999;
+    overflow: scroll;
+    height: calc(100% - 32px);
+}
+
+.acf-fc-layout-controlls {
+    /*right: 35px!important;*/
+}
+
+.proxy-wrapper {
+    width: auto;
+    display: inline-block;
+    height: 0;
+    float: right;
+    margin: 0 auto;
+    position: relative;
+    top: 4px;
+    right: 4px;
+    z-index: 400;
+    color: grey;
+    display: none;
+}
+
+
+.proxy-wrapper label,
+.proxy-wrapper input {
+    display: inline-block;
+}
+
+.proxy-wrapper input {
+    width: 40px!important;
+    /*text-align: right;
+    margin-right: 10px;
+    border: none;
+    overflow: visible;
+    outline: none;
+    box-shadow: none;*/
+}
+
+.ui-resizable-handle.ui-resizable-e {
+
+    display: block;
+    height: 38px;
+    width: 5px;
+    background-color: grey;
+    float: right;
+    margin-top: -38px;
+    position: relative;
+    right: 30px;
+    z-index: 500;    
+    
+}
+
+
+.block-extra {
+    height: 20px;
+    padding: 8px;
+    background-color: #fcfcfc;
+    clear: both;
+    vertical-align: top;
+}
+
+.offset {
+    height: 32px;
+    width: 10px;
+    background-color: grey;
+    position: absolute;
+    top: 0;
+    /*display: none;*/
+}
+
+.offset-right{
+    right: 0;
+}
+
+.resizer {
+
+    -ms-transform: rotate(90deg); /* IE 9 */
+    -webkit-transform: rotate(90deg); /* Chrome, Safari, Opera */
+    transform: rotate(90deg);
+
+    position: static!important;
+    /*float: right;*/
+   /*display: inline;*/
+    float: right;
+
+    -webkit-touch-callout:  none; /* iOS Safari */
+    -webkit-user-select:    none; /* Safari */
+     -khtml-user-select:    none; /* Konqueror HTML */
+       -moz-user-select:    none; /* Firefox */
+        -ms-user-select:    none; /* Internet Explorer/Edge */
+            user-select:    none;
+}
