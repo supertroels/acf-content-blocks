@@ -52,11 +52,13 @@ class acfcb_block {
 
 	public function export(){
 
-		if($this->block['sub_fields'])
+		if($this->block['sub_fields']){
 			foreach($this->block['sub_fields'] as $key => $field){
-				if(!is_array($field))
-					$this->block['sub_fields'][$key] = $field->export();
+				if(!is_array($field)){
+					$this->block['sub_fields'][$key] = $field->add()->export();
+				}
 			}
+		}
 
 		return $this->block;
 
