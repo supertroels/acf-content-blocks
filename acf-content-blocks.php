@@ -97,8 +97,8 @@ class acf_content_blocks {
 					$class = 'acfcb_block_'.$name;
 					$block = new $class();
 
-					$block = apply_filters('acfcb/block', $block, $name);
 					$block = apply_filters('acfcb/block/'.$name, $block, $name);
+					$block = apply_filters('acfcb/block', $block, $name);
 
 					if(method_exists($block, 'export'))
 						$blocks[$name] = $block->export();
@@ -307,6 +307,7 @@ class acf_content_blocks {
 
 
 	}
+
 
 
 }
