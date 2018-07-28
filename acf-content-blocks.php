@@ -215,8 +215,8 @@ class acf_content_blocks {
 	        	$row_layout = get_row_layout();
 				$name = str_ireplace('acfcb_block_', '', $row_layout);
 				$block = new $row_layout();
-
-				self::do_block($name, $block);
+				$callback = apply_filters('acfcb/block_callback', 'acf_content_blocks::do_block');
+				call_user_func_array($callback, [$name, $block]);
 
 	        endwhile;
 
@@ -236,9 +236,13 @@ class acf_content_blocks {
 	    ?>
 	    <div class="block block-<?php echo $name ?> <?php echo implode(' ', apply_filters('acfcb/block/classes', array(), $name, $block)) ?>" <?php self::print_attributes($name, $block) ?>>
 	    <?php
-	    do_action('acfcb/begin_block', $name, $block);
-	    $path = apply_filters('acfcb/template_path', 'blocks/', $name, $block);
-	    include locate_template($path.$name.'.php');
+		
+		do_action('acfcb/begin_block', $name, $block);
+		$path = apply_filters('acfcb/template_path', 'blocks/', $name, $block);
+		$file_name = apply_filters('acfcb/block_file_name', $name.'.php', $name, $block);
+
+		include locate_template($path.$file_name);
+
 	    do_action('acfcb/end_block', $name, $block);
 	    ?>
 	    </div>
@@ -246,6 +250,7 @@ class acf_content_blocks {
 	    do_action('acfcb/after_block', $name, $block);
 
 	}
+
 
 
 	public static function print_attributes($name, $block){
